@@ -49,7 +49,7 @@ spec:
       steps {
         container('playwright') {
           junit 'test-results/results.xml' // Assurez-vous que le chemin est correct pour le fichier XML de résultats
-          allure name: 'Allure Report', results: [[path: 'allure-results']]
+         
         }
       }
     }
