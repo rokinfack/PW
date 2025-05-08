@@ -1,0 +1,3 @@
+🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
+🔄 [beforeEach] Avant "should allow me to display active items"
+🏁 [afterAll] Fermeture du navigateur global

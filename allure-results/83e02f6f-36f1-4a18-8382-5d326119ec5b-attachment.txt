@@ -1,0 +1,3 @@
+🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
+🔄 [beforeEach] Avant "should remove completed items when clicked"
+🏁 [afterAll] Fermeture du navigateur global

@@ -1,0 +1,4 @@
+🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
+🔄 [beforeEach] Avant "should hide other controls when editing"
+❌ Test échoué, capture d'écran...
+🏁 [afterAll] Fermeture du navigateur global

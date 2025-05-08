@@ -1,0 +1,3 @@
+🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
+🔄 [beforeEach] Avant "should highlight the currently applied filter"
+🏁 [afterAll] Fermeture du navigateur global

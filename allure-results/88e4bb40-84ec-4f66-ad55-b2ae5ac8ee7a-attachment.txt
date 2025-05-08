@@ -1,0 +1,4 @@
+🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
+🔄 [beforeEach] Avant "should save edits on blur"
+✅ Test réussi, vérification visuelle...
+🏁 [GLOBAL afterAll] Fin de la suite de tests

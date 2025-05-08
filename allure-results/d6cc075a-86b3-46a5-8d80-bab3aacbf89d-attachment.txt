@@ -1,0 +1,3 @@
+🔄 [beforeEach] Avant "should append new items to the bottom of the list"
+❌ Test échoué, capture d'écran...
+🏁 [GLOBAL afterAll] Fin de la suite de tests
