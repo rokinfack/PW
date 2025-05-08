@@ -1,17 +1,28 @@
-// Jenkinsfile
 pipeline {
-  agent {
-    kubernetes {
-      yaml """
+  agent { label 'docker' } // pour build/push l’image
+
+  environment {
+    IMAGE_TAG = "${BUILD_NUMBER}"
+    IMAGE_NAME = "kinfack/playwright-ci:${IMAGE_TAG}"
+  }
+
+  stages {
+    stage('Build and Push Docker Image') {
+      steps {
+        sh './docker-build-push.sh ${IMAGE_TAG}'
+      }
+    }
+
+    stage('Run Tests in Kubernetes') {
+      agent {
+        kubernetes {
+          yaml """
 apiVersion: v1
 kind: Pod
-metadata:
-  labels:
-    app: playwright
 spec:
   containers:
     - name: playwright
-      image: mcr.microsoft.com/playwright:v1.43.1-jammy
+      image: ${IMAGE_NAME}
       command: ["cat"]
       tty: true
       volumeMounts:
@@ -25,26 +36,8 @@ spec:
     - name: allure
       emptyDir: {}
 """
-    }
-  }
-
-  environment {
-    CI_BASE_URL = 'http://localhost:3000' // change si besoin
-  }
-
-  stages {
-    stage('Install dependencies') {
-      steps {
-        container('playwright') {
-          sh '''
-            npm ci --legacy-peer-deps
-            npx playwright install --with-deps
-          '''
         }
       }
-    }
-
-    stage('Run Playwright tests') {
       steps {
         container('playwright') {
           sh 'npx playwright test'
@@ -52,7 +45,7 @@ spec:
       }
     }
 
-    stage('Publish test results') {
+    stage('Publish Results') {
       steps {
         container('playwright') {
           junit 'test-results/results.xml'
