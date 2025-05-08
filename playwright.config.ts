@@ -2,10 +2,10 @@ import { defineConfig, devices } from '@playwright/test';
 
 export default defineConfig({
   reporter: [
-    ['list'],
-    ['html'],
-    ['allure-playwright', { outputFolder: 'playwright-report/allure-results' }]
+    ['junit', { outputFile: 'test-results/results.xml' }],
+    ['allure-playwright']
   ],
+  
   testDir: './',
   use:{
     trace: 'retain-on-failure'
