@@ -48,8 +48,8 @@ spec:
     stage('Publish Results') {
       steps {
         container('playwright') {
-          junit 'test-results/results.xml'
-          allure includeProperties: false, results: [[path: 'allure-results']]
+          junit 'test-results/results.xml' // Assurez-vous que le chemin est correct pour le fichier XML de résultats
+          allure name: 'Allure Report', results: [[path: 'allure-results']]
         }
       }
     }
