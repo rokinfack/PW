@@ -1,0 +1,13 @@
+# Dockerfile.playwright
+FROM mcr.microsoft.com/playwright:v1.43.0-jammy
+
+WORKDIR /tests
+
+# Copier les fichiers de tests (adapter si besoin)
+COPY tests/ ./
+
+# Installer les dépendances Node.js
+RUN npm ci
+
+# Lancer les tests automatiquement au démarrage
+CMD ["npx", "playwright", "test"]

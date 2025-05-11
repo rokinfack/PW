@@ -1,67 +1,168 @@
 pipeline {
-  agent { label 'docker' } // pour build/push l’image
+    agent {
+        label 'Jenkins Slave Perfs'
+   }
 
-  environment {
-    IMAGE_TAG = "${BUILD_NUMBER}"
-    IMAGE_NAME = "kinfack/playwright-ci:${IMAGE_TAG}"
-  }
+    environment {
+    
+        PROJECT_NAME = "Stromae Devis/Commande Integ"
+        NPM_CONFIG_CACHE = "${WORKSPACE}/npm-cache"
+        DOCKER_IMAGE = 'playwright-tests:latest'
+        BROWSERS_PATH = '/opt/appli/jenkinsSlave/workspace/playwright-browsers/browsers'
+        FIREFOX_REPORT_NAME = 'Rapport-de-test-firefox'
+        CHROME_REPORT_NAME = 'Rapport-de-test-chrome'
+        EDGE_REPORT_NAME = 'Rapport-de-test-edge'
 
-  stages {
-    stage('Build and Push Docker Image') {
-      steps {
-        sh './docker-build-push.sh ${IMAGE_TAG}'
-      }
     }
-
-    stage('Run Tests in Kubernetes') {
-      agent {
-        kubernetes {
-          yaml """
-apiVersion: v1
-kind: Pod
-spec:
-  containers:
-    - name: playwright
-      image: ${IMAGE_NAME}
-      command: ["cat"]
-      tty: true
-      volumeMounts:
-        - name: results
-          mountPath: /app/test-results
-        - name: allure
-          mountPath: /app/allure-results
-  volumes:
-    - name: results
-      emptyDir: {}
-    - name: allure
-      emptyDir: {}
-"""
+    stages {
+        stage('Remove Docker Images') {
+            steps {
+               sh 'docker images'
+               sh 'docker rmi ${DOCKER_IMAGE} | true'
+               sh 'yes | docker buildx prune -a'
+            }
         }
-      }
-      steps {
-        container('playwright') {
-          sh 'npx playwright test'
+        stage('Build Docker Image') {
+            steps {
+                script {
+                    // Construire l'image Docker
+                    sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
+                }
+            }
         }
-      }
+        stage('Install dependancies') {
+            steps {
+                script {
+                    def myImage = docker.image('playwright-tests:latest')
+                        myImage.inside('-u root') {	
+                            sh 'npm ci'		
+                        }
+                }
+            }
+        }
+        stage('Run Playwright Tests') {
+            parallel {
+                stage('Run with firefox') {
+                    steps {
+                        script {
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
+                                sh "npm test"	
+                            }
+                        }
+                    }
+                }
+                stage('Run with Edge') {
+                   steps {
+                        script {
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
+                                sh "npm test"		
+                            }
+                        }
+                    }
+                }
+                stage('Run with Chrome') {
+                    steps {
+                        script {
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
+                                	
+                                sh "npm test"		
+                            }
+                        }
+                    }
+                }
+                // stage('Run with Chromium') {
+                //     steps {
+                //         script {
+                //             def myImage = docker.image('playwright-tests:latest')
+                //             myImage.inside('-u root -e ENVIRONNEMENT=integ -e BROWSER=chromium -e RUNNER=1') {	
+                //                 sh "npx cucumber-js --config=cucumber.js --retry 2 --tags \"@integ and \"@current"	
+                //             }
+                //         }
+                //     }
+                // }
+            }
+        }
     }
+    post {
+        always {
+            script {
+    //             // publishHTML (
+    //             //     target : [
+    //             //             allowMissing: false,
+    //             //             alwaysLinkToLastBuild: true,
+    //             //             keepAll: true,
+    //             //             reportDir: 'reports/chromium',
+    //             //             reportFiles: 'results.html',
+    //             //             reportName: 'Rapport de test chromium',
+    //             //             reportTitles: 'Rapport de test chromium'
+    //             //     ]
+    //             // )
+                publishHTML (
+                    target : [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'reports/chrome',
+                            reportFiles: 'results.html',
+                            reportName: CHROME_REPORT_NAME,
+                            reportTitles: 'Rapport de test chrome'
+                    ]
+                )
+                publishHTML (
+                    target : [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'reports/firefox',
+                            reportFiles: 'results.html',
+                            reportName: FIREFOX_REPORT_NAME,
+                            reportTitles: 'Rapport de test firefox'
+                    ]
+                )
+                publishHTML (
+                    target : [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'reports/edge',
+                            reportFiles: 'results.html',
+                            reportName: EDGE_REPORT_NAME,
+                            reportTitles: 'Rapport de test edge'
+                    ]
+                )
 
-   stage('Publish Results') {
-  steps {
-    container('playwright') {
-      junit 'test-results/results.xml'
-      allure([
-        includeProperties: false,
-        results: [[path: 'allure-results']]
-      ])
+                def jenkinsURL = env.BUILD_URL ?: 'https://jenkins.app.hub-dsi.net'
+                def status = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 'SUCCES ✅' : 'ECHEC ❌'
+                emailext (
+                    to: "${MAILING_LIST}",
+                    subject: "[${PROJECT_NAME}] - Résultats des tests E2E | [${status}]",
+                    body: """
+                        Salut l'équipe, <br/><br/>
+
+                        Les tests E2E pour ${PROJECT_NAME} sont terminés. Vous pouvez consulter les résultats détaillés via les liens ci-dessous : <br/><br/>
+
+                        <h2>Rapport complet des tests: </h2>
+                        <ul>
+                            <li>Firefox: <a href='${BUILD_URL}${FIREFOX_REPORT_NAME}'>Voir le rapport</a></li>
+                            <li>Chrome: <a href='${BUILD_URL}${CHROME_REPORT_NAME}'>Voir le rapport</a></li>
+                            <li>Edge: <a href='${BUILD_URL}${EDGE_REPORT_NAME}'>Voir le rapport</a></li>
+                        </ul><br/><br/>
+
+                        N'hésitez pas à me faire signe si vous avez des questions ou si vous avez besoin de plus de détails.<br/><br/>
+
+                        Bonne journée à tous !<br/><br/>
+
+                        Fred Zengue
+                    """,
+                    attachLog: true,
+                    mimeType: 'text/html'
+                )
+
+
+            }
+        }
     }
-  }
-}
-
-  }
-
-  post {
-    always {
-      cleanWs()
-    }
-  }
 }
