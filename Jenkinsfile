@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'Jenkins Slave Perfs'
-   }
+    agent any
 
     environment {
     
