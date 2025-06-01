@@ -2,11 +2,11 @@ pipeline {
     agent any
 
     environment {
-    
         PROJECT_NAME = "Stromae Devis/Commande Integ"
         NPM_CONFIG_CACHE = "${WORKSPACE}/npm-cache"
         DOCKER_IMAGE = 'playwright-tests:latest'
         BROWSERS_PATH = '/opt/appli/jenkinsSlave/workspace/playwright-browsers/browsers'
+        MAILING_LIST = 'f.zengue.ext@hubone.fr'
         FIREFOX_REPORT_NAME = 'Rapport-de-test-firefox'
         CHROME_REPORT_NAME = 'Rapport-de-test-chrome'
         EDGE_REPORT_NAME = 'Rapport-de-test-edge'

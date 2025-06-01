@@ -1,12 +1,22 @@
-FROM mcr.microsoft.com/playwright:v1.43.1-jammy
+FROM mcr.microsoft.com/playwright:v1.49.1-noble
+
+
+ENV CACHEBUST 1
+
+ENV ENVIRONNEMENT  integ
+ENV PLAYWRIGHT_BROWSERS_PATH /ms-playwright
 
 WORKDIR /app
 
-COPY package*.json ./
-RUN npm install --legacy-peer-deps
+COPY . /app
 
-COPY . .
+# RUN npm ci
 
-RUN npx playwright install --with-deps
+# RUN npx playwright install --only-shell chromium
+# RUN npx playwright install --only-shell chrome
+# RUN npx playwright install --only-shell msedge
+# RUN npx playwright install --only-shell firefox
 
-CMD ["npx", "playwright", "test"]
+# ENV http_proxy ""
+# ENV https_proxy ""
+

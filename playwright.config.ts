@@ -8,8 +8,10 @@ export default defineConfig({
   
   testDir: './',
   use:{
-    trace: 'retain-on-failure'
+    trace: 'retain-on-failure',
+    baseURL: 'https://www.saucedemo.com',
   },
+ 
   projects: [
     // Projet de setup : s’authentifie et génère le fichier user.json
     {
