@@ -1,5 +1,7 @@
 pipeline {
-    agent any
+     agent {
+        label 'jenkinsqa'
+    }
 
     environment {
         PROJECT_NAME = "Stromae Devis/Commande Integ"
