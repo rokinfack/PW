@@ -10,7 +10,7 @@ WORKDIR /app
 
 COPY . /app
 
-# RUN npm ci
+ RUN npm ci
 
  RUN npx playwright install --only-shell chromium
  RUN npx playwright install --only-shell chrome
