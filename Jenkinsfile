@@ -115,4 +115,21 @@ pipeline {
                     subject: "[${PROJECT_NAME}] - Résultats des tests E2E | [${status}]",
                     body: """
                         Salut l'équipe, <br/><br/>
-                        Les tests E2E pour ${PROJECT_NAME} sont terminés. Vous pouvez consulter les résultats détaillés via les liens ci-des_
+                        Les tests E2E pour ${PROJECT_NAME} sont terminés. Vous pouvez consulter les résultats détaillés via les liens ci-dessous : <br/><br/>
+                        <h2>Rapport complet des tests :</h2>
+                        <ul>
+                            <li>Firefox: <a href='${BUILD_URL}${FIREFOX_REPORT_NAME}'>Voir le rapport</a></li>
+                            <li>Chrome: <a href='${BUILD_URL}${CHROME_REPORT_NAME}'>Voir le rapport</a></li>
+                            <li>Edge: <a href='${BUILD_URL}${EDGE_REPORT_NAME}'>Voir le rapport</a></li>
+                        </ul><br/><br/>
+                        N'hésitez pas à me faire signe si vous avez des questions ou besoin de plus de détails.<br/><br/>
+                        Bonne journée à tous !<br/><br/>
+                        Fred Zengue
+                    """,
+                    attachLog: true,
+                    mimeType: 'text/html'
+                )
+            }
+        }
+    }
+}
