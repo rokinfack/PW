@@ -13,8 +13,6 @@ COPY . /app
  RUN npm ci
 
  RUN npx playwright install --only-shell chromium
- RUN npx playwright install --only-shell chrome
- RUN npx playwright install --only-shell msedge
  RUN npx playwright install --only-shell firefox
 
 # ENV http_proxy ""
