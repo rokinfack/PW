@@ -14,16 +14,28 @@ pipeline {
     }
 
     stages {
+        stage('Test Simple Shell') {
+            steps {
+                echo "Testing simple shell commands"
+                sh 'echo "Hello from shell"'
+                sh 'ls -la ${WORKSPACE}'
+            }
+        }
+
         stage('Remove Docker Images') {
             steps {
-                sh 'docker images'
+                echo "Listing Docker images"
+                sh 'docker images || true'
+                echo "Removing Docker image if exists"
                 sh 'docker rmi ${DOCKER_IMAGE} || true'
-                sh 'yes | docker buildx prune -a'
+                echo "Pruning Docker builder"
+                sh 'yes | docker buildx prune -a || true'
             }
         }
 
         stage('Build Docker Image') {
             steps {
+                echo "Building Docker image"
                 script {
                     sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
                 }
@@ -35,9 +47,10 @@ pipeline {
                 stage('Run with Firefox') {
                     steps {
                         script {
+                            echo "Running tests with Firefox"
                             def myImage = docker.image(DOCKER_IMAGE)
                             myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
-                                sh 'npx playwright test'
+                                sh 'npx playwright test --project=firefox'
                             }
                         }
                     }
@@ -46,9 +59,10 @@ pipeline {
                 stage('Run with Edge') {
                     steps {
                         script {
+                            echo "Running tests with Edge"
                             def myImage = docker.image(DOCKER_IMAGE)
                             myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
-                                sh 'npx playwright test'
+                                sh 'npx playwright test --project=edge'
                             }
                         }
                     }
@@ -57,9 +71,10 @@ pipeline {
                 stage('Run with Chrome') {
                     steps {
                         script {
+                            echo "Running tests with Chrome"
                             def myImage = docker.image(DOCKER_IMAGE)
-                            myImage.inside("-u root -v ${WORKSPACE}/reports/chrome:/app/reports") {
-                                sh 'npx playwright test'
+                            myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
+                                sh 'npx playwright test --project=chromium'
                             }
                         }
                     }
@@ -69,6 +84,7 @@ pipeline {
 
         stage('Debug Report Directories') {
             steps {
+                echo "Listing reports directories"
                 sh 'ls -l ${WORKSPACE}/reports || echo "No Chrome reports found"'
                 sh 'ls -l ${WORKSPACE}/reports || echo "No Firefox reports found"'
                 sh 'ls -l ${WORKSPACE}/reports || echo "No Edge reports found"'
@@ -79,8 +95,9 @@ pipeline {
     post {
         always {
             script {
+                echo "Publishing HTML reports"
                 publishHTML(target: [
-                    allowMissing: false,
+                    allowMissing: true,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'reports',
@@ -90,7 +107,7 @@ pipeline {
                 ])
 
                 publishHTML(target: [
-                    allowMissing: false,
+                    allowMissing: true,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'reports',
@@ -100,7 +117,7 @@ pipeline {
                 ])
 
                 publishHTML(target: [
-                    allowMissing: false,
+                    allowMissing: true,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
                     reportDir: 'reports',
