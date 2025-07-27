@@ -7,7 +7,6 @@ pipeline {
         PROJECT_NAME = "Stromae Devis/Commande Integ"
         NPM_CONFIG_CACHE = "${WORKSPACE}/npm-cache"
         DOCKER_IMAGE = 'playwright-tests:latest'
-        BROWSERS_PATH = '/opt/appli/jenkinsSlave/workspace/playwright-browsers/browsers'
         MAILING_LIST = 'f.zengue.ext@hubone.fr'
         FIREFOX_REPORT_NAME = 'Rapport-de-test-firefox'
         CHROME_REPORT_NAME = 'Rapport-de-test-chrome'
@@ -46,7 +45,7 @@ pipeline {
                     steps {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
+                            myImage.inside("-u root") {
                                 sh "npm test"	
                             }
                         }
@@ -56,7 +55,7 @@ pipeline {
                    steps {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
+                            myImage.inside("-u root ") {
                                 sh "npm test"		
                             }
                         }
@@ -66,7 +65,7 @@ pipeline {
                     steps {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
+                            myImage.inside("-u root ") {
                                 	
                                 sh "npm test"		
                             }
@@ -105,7 +104,7 @@ pipeline {
                             allowMissing: false,
                             alwaysLinkToLastBuild: true,
                             keepAll: true,
-                            reportDir: 'reports/chrome',
+                            reportDir: 'reports',
                             reportFiles: 'results.html',
                             reportName: CHROME_REPORT_NAME,
                             reportTitles: 'Rapport de test chrome'
@@ -116,7 +115,7 @@ pipeline {
                             allowMissing: false,
                             alwaysLinkToLastBuild: true,
                             keepAll: true,
-                            reportDir: 'reports/firefox',
+                            reportDir: 'reports',
                             reportFiles: 'results.html',
                             reportName: FIREFOX_REPORT_NAME,
                             reportTitles: 'Rapport de test firefox'
@@ -127,7 +126,7 @@ pipeline {
                             allowMissing: false,
                             alwaysLinkToLastBuild: true,
                             keepAll: true,
-                            reportDir: 'reports/edge',
+                            reportDir: 'reports',
                             reportFiles: 'results.html',
                             reportName: EDGE_REPORT_NAME,
                             reportTitles: 'Rapport de test edge'
