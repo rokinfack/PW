@@ -39,7 +39,7 @@ pipeline {
                             }
                         }
                     }
-                }
+                
                 stage('Run with Edge') {
                     steps {
                         script {
@@ -49,7 +49,7 @@ pipeline {
                             }
                         }
                     }
-                }
+                
                 stage('Run with Chrome') {
                     steps {
                         script {
