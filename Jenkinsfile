@@ -48,10 +48,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Firefox"
-                            def myImage = docker.image(DOCKER_IMAGE)
-                            myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
-                                sh 'npx playwright test --project=firefox'
-                            }
+                             sh 'npx playwright test --project=firefox'
                         }
                     }
                 }
@@ -60,10 +57,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Edge"
-                            def myImage = docker.image(DOCKER_IMAGE)
-                            myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
-                                sh 'npx playwright test --project=edge'
-                            }
+                             sh 'npx playwright test --project=firefox'
                         }
                     }
                 }
@@ -72,10 +66,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Chrome"
-                            def myImage = docker.image(DOCKER_IMAGE)
-                            myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
-                                sh 'npx playwright test --project=chromium'
-                            }
+                             sh 'npx playwright test --project=firefox'
                         }
                     }
                 }
