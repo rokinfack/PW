@@ -36,8 +36,8 @@ pipeline {
                     steps {
                         script {
                             def myImage = docker.image(DOCKER_IMAGE)
-                            myImage.inside("-u root -v ${WORKSPACE}/reports/firefox:/app/reports") {
-                                sh 'export BROWSER=firefox && npm test'
+                            myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
+                                sh 'npx playwright test'
                             }
                         }
                     }
@@ -47,8 +47,8 @@ pipeline {
                     steps {
                         script {
                             def myImage = docker.image(DOCKER_IMAGE)
-                            myImage.inside("-u root -v ${WORKSPACE}/reports/edge:/app/reports") {
-                                sh 'export BROWSER=edge && npm test'
+                            myImage.inside("-u root -v ${WORKSPACE}/reports:/app/reports") {
+                                sh 'npx playwright test'
                             }
                         }
                     }
@@ -59,7 +59,7 @@ pipeline {
                         script {
                             def myImage = docker.image(DOCKER_IMAGE)
                             myImage.inside("-u root -v ${WORKSPACE}/reports/chrome:/app/reports") {
-                                sh 'export BROWSER=chrome && npm test'
+                                sh 'npx playwright test'
                             }
                         }
                     }
@@ -69,9 +69,9 @@ pipeline {
 
         stage('Debug Report Directories') {
             steps {
-                sh 'ls -l ${WORKSPACE}/reports/chrome || echo "No Chrome reports found"'
-                sh 'ls -l ${WORKSPACE}/reports/firefox || echo "No Firefox reports found"'
-                sh 'ls -l ${WORKSPACE}/reports/edge || echo "No Edge reports found"'
+                sh 'ls -l ${WORKSPACE}/reports || echo "No Chrome reports found"'
+                sh 'ls -l ${WORKSPACE}/reports || echo "No Firefox reports found"'
+                sh 'ls -l ${WORKSPACE}/reports || echo "No Edge reports found"'
             }
         }
     }
@@ -83,7 +83,7 @@ pipeline {
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
-                    reportDir: 'reports/chrome',
+                    reportDir: 'reports',
                     reportFiles: 'results.html',
                     reportName: CHROME_REPORT_NAME,
                     reportTitles: 'Rapport de test Chrome'
@@ -93,7 +93,7 @@ pipeline {
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
-                    reportDir: 'reports/firefox',
+                    reportDir: 'reports',
                     reportFiles: 'results.html',
                     reportName: FIREFOX_REPORT_NAME,
                     reportTitles: 'Rapport de test Firefox'
@@ -103,7 +103,7 @@ pipeline {
                     allowMissing: false,
                     alwaysLinkToLastBuild: true,
                     keepAll: true,
-                    reportDir: 'reports/edge',
+                    reportDir: 'reports',
                     reportFiles: 'results.html',
                     reportName: EDGE_REPORT_NAME,
                     reportTitles: 'Rapport de test Edge'
