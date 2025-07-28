@@ -46,7 +46,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Firefox"
-                             sh 'npx playwright test --project=firefox'
+                             sh 'npm run test:firefox'
                         }
                     }
                 }
@@ -55,7 +55,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Edge"
-                             sh 'npx playwright test --project=firefox'
+                             sh 'npm run test:firefox'
                         }
                     }
                 }
@@ -64,7 +64,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Chrome"
-                             sh 'npx playwright test --project=firefox'
+                             sh 'npm run test:firefox'
                         }
                     }
                 }
