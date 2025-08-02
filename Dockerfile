@@ -1,19 +1,32 @@
 FROM mcr.microsoft.com/playwright:v1.54.0-noble
 
-
-ENV CACHEBUST 1
-
-ENV ENVIRONNEMENT  integ
-ENV PLAYWRIGHT_BROWSERS_PATH /ms-playwright
+# Variables d'environnement
+ENV ENVIRONNEMENT=integ
+ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 WORKDIR /app
 
-COPY . /app
+# 1️⃣ Installer Docker CLI pour pouvoir utiliser le socket Docker
+USER root
+RUN apt-get update && apt-get install -y \
+    docker.io \
+    docker-compose-plugin \
+    && rm -rf /var/lib/apt/lists/*
 
+# 2️⃣ Copier d'abord les fichiers de dépendances pour profiter du cache Docker
+COPY package*.json ./
 
- RUN npx playwright install --only-shell chromium
- RUN npx playwright install --only-shell firefox
+# 3️⃣ Installer les dépendances Node.js
+RUN npm ci
 
-# ENV http_proxy ""
-# ENV https_proxy ""
+# 4️⃣ Copier le reste du code
+COPY . .
 
+# 5️⃣ Installer les navigateurs Playwright avec toutes les dépendances
+RUN npx playwright install --with-deps chromium firefox
+
+# 6️⃣ Nettoyer le cache pour réduire la taille de l'image
+RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+
+# 7️⃣ Commande par défaut : lancer les tests
+CMD ["npx", "playwright", "test"]
