@@ -1,10 +1,5 @@
 pipeline {
-       agent {
-        docker {
-            image 'docker:24.0.6-dind'
-            args '--privileged -v /var/lib/docker'
-        }
-    }
+    agent any
 
     environment {
         PROJECT_NAME       = "Stromae Devis/Commande Integ"

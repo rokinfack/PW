@@ -8,9 +8,7 @@ WORKDIR /app
 
 # 1️⃣ Installer Docker CLI minimal pour accéder au socket Docker
 USER root
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends \
-    docker.io \
+RUN apt-get update && apt-get install -y docker.io \
     && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2️⃣ Copier d'abord les fichiers de dépendances pour profiter du cache Docker
