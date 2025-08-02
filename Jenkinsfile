@@ -64,7 +64,7 @@ pipeline {
                     steps {
                         script {
                             echo "Running tests with Chrome"
-                             sh 'npm run test:firefox'
+                             sh 'npm run test:chrome'
                         }
                     }
                 }
@@ -74,9 +74,9 @@ pipeline {
         stage('Debug Report Directories') {
             steps {
                 echo "Listing reports directories"
-                sh 'ls -l ${WORKSPACE}/reports || echo "No Chrome reports found"'
-                sh 'ls -l ${WORKSPACE}/reports || echo "No Firefox reports found"'
-                sh 'ls -l ${WORKSPACE}/reports || echo "No Edge reports found"'
+                sh 'ls -l ${WORKSPACE}/playwright-report || echo "No Chrome reports found"'
+                sh 'ls -l ${WORKSPACE}/playwright-report || echo "No Firefox reports found"'
+                sh 'ls -l ${WORKSPACE}/playwright-report || echo "No Edge reports found"'
             }
         }
     }
