@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/playwright:v1.52.0-noble
+FROM mcr.microsoft.com/playwright:v1.54.0-noble
 
 
 ENV CACHEBUST 1
@@ -10,12 +10,9 @@ WORKDIR /app
 
 COPY . /app
 
-# RUN npm ci
 
-# RUN npx playwright install --only-shell chromium
-# RUN npx playwright install --only-shell chrome
-# RUN npx playwright install --only-shell msedge
-# RUN npx playwright install --only-shell firefox
+ RUN npx playwright install --only-shell chromium
+ RUN npx playwright install --only-shell firefox
 
 # ENV http_proxy ""
 # ENV https_proxy ""
