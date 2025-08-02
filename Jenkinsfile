@@ -9,47 +9,45 @@ pipeline {
         FIREFOX_REPORT_NAME = 'Rapport-de-test-firefox'
         CHROME_REPORT_NAME = 'Rapport-de-test-chrome'
         EDGE_REPORT_NAME = 'Rapport-de-test-edge'
-
     }
+
     stages {
         stage('Build Docker Image') {
             steps {
                 script {
-                    // Construire l'image Docker
-                     withEnv(['DOCKER_HOST=']) {
+                    withEnv(['DOCKER_HOST=']) {
                         sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
-                     } 
+                    }
                 }
             }
         }
-        stage('Install dependancies') {
+
+        stage('Install dependencies') {
             steps {
                 script {
-                    def myImage = docker.image('playwright-tests:latest')
-                        myImage.inside('-u root') {	
-                            sh 'npm ci'		
-                        }
+                    docker.image(DOCKER_IMAGE).inside('-u root') {
+                        sh 'npm ci'
+                    }
                 }
             }
         }
+
         stage('Run Playwright Tests') {
             parallel {
                 stage('Run with firefox') {
                     steps {
                         script {
-                            def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
-                                sh "npm run test:allure1"
+                            docker.image(DOCKER_IMAGE).inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
+                                sh "npm run test:allure"
                             }
                         }
                     }
                 }
                 stage('Run with Edge') {
-                   steps {
+                    steps {
                         script {
-                            def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
-                                sh "npm run test:allure2"	
+                            docker.image(DOCKER_IMAGE).inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
+                                sh "npm run test:allure"
                             }
                         }
                     }
@@ -57,101 +55,88 @@ pipeline {
                 stage('Run with Chrome') {
                     steps {
                         script {
-                            def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
-                                sh "npm run test:allure2"	
-                            }
-                        }
-                    }
-                }
-                stage('Run with Chromium') {
-                    steps {
-                        script {
-                            def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside('-u root -e ENVIRONNEMENT=integ -e BROWSER=chromium -e RUNNER=1') {	
-                                sh "npm run allure:open"	
+                            docker.image(DOCKER_IMAGE).inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
+                                sh "npm run test:allure"
                             }
                         }
                     }
                 }
             }
         }
+
+        stage('Generate Allure & HTML Reports') {
+            steps {
+                script {
+                    docker.image(DOCKER_IMAGE).inside("-u root") {
+                        // Générer le rapport Allure
+                        sh "npx allure generate allure-results --clean -o allure-report || true"
+                        sh "ls -la allure-report || true"
+
+                        // Générer le rapport HTML Playwright
+                        sh "npx playwright show-report --output playwright-report || true"
+                        sh "ls -la playwright-report || true"
+                    }
+                }
+            }
+        }
     }
+
     post {
         always {
             script {
-    //             // publishHTML (
-    //             //     target : [
-    //             //             allowMissing: false,
-    //             //             alwaysLinkToLastBuild: true,
-    //             //             keepAll: true,
-    //             //             reportDir: 'reports/chromium',
-    //             //             reportFiles: 'results.html',
-    //             //             reportName: 'Rapport de test chromium',
-    //             //             reportTitles: 'Rapport de test chromium'
-    //             //     ]
-    //             // )
+                // Publication des rapports HTML dans Jenkins
                 publishHTML (
                     target : [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'playwright-report',
-                            reportFiles: 'index.html',
-                            reportName: CHROME_REPORT_NAME,
-                            reportTitles: 'Rapport de test chrome'
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: CHROME_REPORT_NAME,
+                        reportTitles: 'Rapport de test Chrome'
                     ]
                 )
                 publishHTML (
                     target : [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'playwright-report',
-                            reportFiles: 'index.html',
-                            reportName: FIREFOX_REPORT_NAME,
-                            reportTitles: 'Rapport de test firefox'
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: FIREFOX_REPORT_NAME,
+                        reportTitles: 'Rapport de test Firefox'
                     ]
                 )
                 publishHTML (
                     target : [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'playwright-report',
-                            reportFiles: 'index.html',
-                            reportName: EDGE_REPORT_NAME,
-                            reportTitles: 'Rapport de test edge'
+                        allowMissing: true,
+                        alwaysLinkToLastBuild: true,
+                        keepAll: true,
+                        reportDir: 'playwright-report',
+                        reportFiles: 'index.html',
+                        reportName: EDGE_REPORT_NAME,
+                        reportTitles: 'Rapport de test Edge'
                     ]
                 )
 
+                // Envoi email de résumé
                 def status = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 'SUCCES ✅' : 'ECHEC ❌'
                 emailext (
                     to: "${MAILING_LIST}",
                     subject: "[${PROJECT_NAME}] - Résultats des tests E2E | [${status}]",
                     body: """
                         Salut l'équipe, <br/><br/>
-
-                        Les tests E2E pour ${PROJECT_NAME} sont terminés. Vous pouvez consulter les résultats détaillés via les liens ci-dessous : <br/><br/>
-
-                        <h2>Rapport complet des tests: </h2>
+                        Les tests E2E pour ${PROJECT_NAME} sont terminés. Vous pouvez consulter les rapports : <br/><br/>
                         <ul>
                             <li>Firefox: <a href='${BUILD_URL}${FIREFOX_REPORT_NAME}'>Voir le rapport</a></li>
                             <li>Chrome: <a href='${BUILD_URL}${CHROME_REPORT_NAME}'>Voir le rapport</a></li>
                             <li>Edge: <a href='${BUILD_URL}${EDGE_REPORT_NAME}'>Voir le rapport</a></li>
                         </ul><br/><br/>
-
-                        N'hésitez pas à me faire signe si vous avez des questions ou si vous avez besoin de plus de détails.<br/><br/>
-
-                        Bonne journée à tous !<br/><br/>
-
-                        Fred Zengue
+                        Bonne journée à tous !
                     """,
                     attachLog: true,
                     mimeType: 'text/html'
                 )
-
-
             }
         }
     }
