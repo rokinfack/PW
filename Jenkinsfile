@@ -20,22 +20,14 @@ pipeline {
             }
         }
 
-        stage('Remove Docker Images') {
-            steps {
-                echo "Listing Docker images"
-                sh 'docker images || true'
-                echo "Removing Docker image if exists"
-                sh 'docker rmi ${DOCKER_IMAGE} || true'
-                echo "Pruning Docker builder"
-                sh 'yes | docker buildx prune -a || true'
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image"
                 script {
-                    sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
+                    withEnv(['DOCKER_HOST=']) {
+                  sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
+              }
+                    
                 }
             }
         }
