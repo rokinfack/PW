@@ -49,7 +49,7 @@ pipeline {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
                             myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
-                                sh "npm run test:allure2"		
+                                sh "npm run test:allure2"	
                             }
                         }
                     }
@@ -59,22 +59,21 @@ pipeline {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
                             myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
-                                	
                                 sh "npm run test:allure2"	
                             }
                         }
                     }
                 }
-                // stage('Run with Chromium') {
-                //     steps {
-                //         script {
-                //             def myImage = docker.image('playwright-tests:latest')
-                //             myImage.inside('-u root -e ENVIRONNEMENT=integ -e BROWSER=chromium -e RUNNER=1') {	
-                //                 sh "npx cucumber-js --config=cucumber.js --retry 2 --tags \"@integ and \"@current"	
-                //             }
-                //         }
-                //     }
-                // }
+                stage('Run with Chromium') {
+                    steps {
+                        script {
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside('-u root -e ENVIRONNEMENT=integ -e BROWSER=chromium -e RUNNER=1') {	
+                                sh "npm run allure:open"	
+                            }
+                        }
+                    }
+                }
             }
         }
     }
