@@ -5,7 +5,6 @@ pipeline {
         PROJECT_NAME = "Stromae Devis/Commande Integ"
         NPM_CONFIG_CACHE = "${WORKSPACE}/npm-cache"
         DOCKER_IMAGE = 'playwright-tests:latest'
-        BROWSERS_PATH = '/opt/appli/jenkinsSlave/workspace/playwright-browsers/browsers'
         MAILING_LIST = 'test@google.com'
         FIREFOX_REPORT_NAME = 'Rapport-de-test-firefox'
         CHROME_REPORT_NAME = 'Rapport-de-test-chrome'
@@ -13,18 +12,13 @@ pipeline {
 
     }
     stages {
-        stage('Remove Docker Images') {
-            steps {
-               sh 'docker images'
-               sh 'docker rmi ${DOCKER_IMAGE} | true'
-               sh 'yes | docker buildx prune -a'
-            }
-        }
         stage('Build Docker Image') {
             steps {
                 script {
                     // Construire l'image Docker
-                    sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
+                     withEnv(['DOCKER_HOST=']) {
+                        sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
+                     } 
                 }
             }
         }
@@ -44,8 +38,8 @@ pipeline {
                     steps {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
-                                sh "npm test"	
+                            myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
+                                sh "npm run test:allure"
                             }
                         }
                     }
@@ -54,8 +48,8 @@ pipeline {
                    steps {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
-                                sh "npm test:firefox"		
+                            myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
+                                sh "npm run test:allure"		
                             }
                         }
                     }
@@ -64,9 +58,9 @@ pipeline {
                     steps {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
-                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
+                            myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
                                 	
-                                sh "npm test:chrome"		
+                                sh "npm run test:allure"	
                             }
                         }
                     }
