@@ -39,7 +39,7 @@ pipeline {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
                             myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
-                                sh "npm run test:allure"
+                                sh "npm run test:allure1"
                             }
                         }
                     }
@@ -49,7 +49,7 @@ pipeline {
                         script {
                             def myImage = docker.image('playwright-tests:latest')
                             myImage.inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
-                                sh "npm run test:allure"		
+                                sh "npm run test:allure2"		
                             }
                         }
                     }
@@ -60,7 +60,7 @@ pipeline {
                             def myImage = docker.image('playwright-tests:latest')
                             myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
                                 	
-                                sh "npm run test:allure"	
+                                sh "npm run test:allure2"	
                             }
                         }
                     }

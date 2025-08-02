@@ -8,7 +8,8 @@
     "test:chrome": "npx playwright test --project=chromium",
     "allure:generate": "allure generate allure-results --clean -o allure-report",
     "allure:open": "allure open allure-report",
-    "test:allure": "npm run test && npm run allure:generate && npm run allure:open"
+    "test:allure1": "npm run test:firefox && npm run allure:generate && npm run allure:open",
+    "test:allure2": "npm run test:chrome && npm run allure:generate && npm run allure:open"
   },
   "keywords": [],
   "author": "",
