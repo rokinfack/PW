@@ -13,18 +13,6 @@ pipeline {
     }
 
     stages {
-
-        stage('Cleanup Docker') {
-            steps {
-                echo "Cleaning old images and builder cache"
-                sh '''
-                    docker images || true
-                    docker rmi ${DOCKER_IMAGE} || true
-                    yes | docker buildx prune -a || true
-                '''
-            }
-        }
-
         stage('Build Docker Image') {
             steps {
                 echo "Building Docker image for Playwright tests"
