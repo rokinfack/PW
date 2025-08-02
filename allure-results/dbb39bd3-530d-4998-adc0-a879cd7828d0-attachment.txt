@@ -1,3 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "should display the current number of todo items"
-🏁 [afterAll] Fermeture du navigateur global

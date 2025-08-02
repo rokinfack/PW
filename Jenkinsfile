@@ -103,35 +103,14 @@ pipeline {
                             allowMissing: false,
                             alwaysLinkToLastBuild: true,
                             keepAll: true,
-                            reportDir: 'reports/chrome',
-                            reportFiles: 'results.html',
+                            reportDir: 'playwright-report',
+                            reportFiles: 'index.html',
                             reportName: CHROME_REPORT_NAME,
                             reportTitles: 'Rapport de test chrome'
                     ]
                 )
-                publishHTML (
-                    target : [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'reports/firefox',
-                            reportFiles: 'results.html',
-                            reportName: FIREFOX_REPORT_NAME,
-                            reportTitles: 'Rapport de test firefox'
-                    ]
-                )
-                publishHTML (
-                    target : [
-                            allowMissing: false,
-                            alwaysLinkToLastBuild: true,
-                            keepAll: true,
-                            reportDir: 'reports/edge',
-                            reportFiles: 'results.html',
-                            reportName: EDGE_REPORT_NAME,
-                            reportTitles: 'Rapport de test edge'
-                    ]
-                )
-
+             
+           
                 def jenkinsURL = env.BUILD_URL ?: 'https://jenkins.app.hub-dsi.net'
                 def status = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 'SUCCES ✅' : 'ECHEC ❌'
                 emailext (

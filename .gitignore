@@ -8,3 +8,10 @@ node_modules/
 playwright/.auth
 poc-playwright/allure-report/*
 allure-results/*
+# Secrets
+.env
+
+# Playwright auth storage
+playwright/.auth/
+screenshots/
+allure-report/

@@ -1,3 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "should allow me to un-mark items as complete"
-🏁 [afterAll] Fermeture du navigateur global

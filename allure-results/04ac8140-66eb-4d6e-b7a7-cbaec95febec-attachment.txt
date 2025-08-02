@@ -1,4 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "should cancel edits on escape"
-❌ Test échoué, capture d'écran...
-🏁 [GLOBAL afterAll] Fin de la suite de tests

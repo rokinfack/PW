@@ -1,3 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "should append new items to the bottom of the list"
-🏁 [afterAll] Fermeture du navigateur global

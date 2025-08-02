@@ -1,4 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "should clear text input field when an item is added"
-❌ Test échoué, capture d'écran...
-🏁 [afterAll] Fermeture du navigateur global

@@ -1,4 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "complete all checkbox should update state when items are completed / cleared"
-✅ Test réussi, vérification visuelle...
-🏁 [GLOBAL afterAll] Fin de la suite de tests

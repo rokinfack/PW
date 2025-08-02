@@ -1,3 +1,0 @@
-🔄 [beforeEach] Avant "should allow me to display all items"
-❌ Test échoué, capture d'écran...
-🏁 [GLOBAL afterAll] Fin de la suite de tests

@@ -1,3 +1,0 @@
-🔄 [beforeEach] Avant "should remove completed items when clicked"
-❌ Test échoué, capture d'écran...
-🏁 [GLOBAL afterAll] Fin de la suite de tests

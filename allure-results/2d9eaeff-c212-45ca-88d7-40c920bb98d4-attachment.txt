@@ -1,4 +1,0 @@
-🚀 [GLOBAL beforeAll] Initialisation avant toute la suite de tests
-🔄 [beforeEach] Avant "should allow me to mark items as complete"
-✅ Test réussi, vérification visuelle...
-🏁 [GLOBAL afterAll] Fin de la suite de tests

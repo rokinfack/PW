@@ -3,7 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   reporter: [
     ['junit', { outputFile: 'test-results/results.xml' }],
-    ['allure-playwright']
+    ['allure-playwright', { outputFolder: 'allure-results' }],
+    ['html', { open: 'never', outputFolder: 'playwright-report' }]
   ],
   
   testDir: './',
