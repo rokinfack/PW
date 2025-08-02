@@ -1,7 +1,5 @@
 pipeline {
-    agent {
-        label 'Jenkins Slave Perfs'
-   }
+    agent any
 
     environment {
         PROJECT_NAME = "Stromae Devis/Commande Integ"
