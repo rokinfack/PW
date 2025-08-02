@@ -6,12 +6,12 @@ ENV PLAYWRIGHT_BROWSERS_PATH=/ms-playwright
 
 WORKDIR /app
 
-# 1️⃣ Installer Docker CLI pour pouvoir utiliser le socket Docker
+# 1️⃣ Installer Docker CLI minimal pour accéder au socket Docker
 USER root
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     docker.io \
-    docker-compose-plugin \
-    && rm -rf /var/lib/apt/lists/*
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # 2️⃣ Copier d'abord les fichiers de dépendances pour profiter du cache Docker
 COPY package*.json ./
@@ -25,8 +25,4 @@ COPY . .
 # 5️⃣ Installer les navigateurs Playwright avec toutes les dépendances
 RUN npx playwright install --with-deps chromium firefox
 
-# 6️⃣ Nettoyer le cache pour réduire la taille de l'image
-RUN rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
-
-# 7️⃣ Commande par défaut : lancer les tests
-CMD ["npx", "playwright", "test"]
+# 6️⃣ Nettoyer
