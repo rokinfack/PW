@@ -1,78 +1,91 @@
 pipeline {
-    agent any
+    agent {
+        label 'Jenkins Slave Perfs'
+   }
 
     environment {
         PROJECT_NAME = "Stromae Devis/Commande Integ"
         NPM_CONFIG_CACHE = "${WORKSPACE}/npm-cache"
         DOCKER_IMAGE = 'playwright-tests:latest'
-        MAILING_LIST = 'rostand@test.com'
+        BROWSERS_PATH = '/opt/appli/jenkinsSlave/workspace/playwright-browsers/browsers'
+        MAILING_LIST = 'test@google.com'
         FIREFOX_REPORT_NAME = 'Rapport-de-test-firefox'
         CHROME_REPORT_NAME = 'Rapport-de-test-chrome'
         EDGE_REPORT_NAME = 'Rapport-de-test-edge'
-    }
 
+    }
     stages {
-        stage('Test Simple Shell') {
+        stage('Remove Docker Images') {
             steps {
-                echo "Testing simple shell commands"
-                sh 'echo "Hello from shell"'
-                sh 'ls -la ${WORKSPACE}'
+               sh 'docker images'
+               sh 'docker rmi ${DOCKER_IMAGE} | true'
+               sh 'yes | docker buildx prune -a'
             }
         }
-
         stage('Build Docker Image') {
             steps {
-                echo "Building Docker image"
                 script {
-                    withEnv(['DOCKER_HOST=']) {
-                  sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
-              }
-                    
+                    // Construire l'image Docker
+                    sh "docker build --no-cache -t ${DOCKER_IMAGE} ."
                 }
             }
         }
-
+        stage('Install dependancies') {
+            steps {
+                script {
+                    def myImage = docker.image('playwright-tests:latest')
+                        myImage.inside('-u root') {	
+                            sh 'npm ci'		
+                        }
+                }
+            }
+        }
         stage('Run Playwright Tests') {
             parallel {
-                stage('Run with Firefox') {
+                stage('Run with firefox') {
                     steps {
                         script {
-                            echo "Running tests with Firefox"
-                             sh 'npm run test:firefox'
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
+                                sh "npm test"	
+                            }
                         }
                     }
                 }
-
                 stage('Run with Edge') {
-                    steps {
+                   steps {
                         script {
-                            echo "Running tests with Edge"
-                             sh 'npm run test:firefox'
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
+                                sh "npm test:firefox"		
+                            }
                         }
                     }
                 }
-
                 stage('Run with Chrome') {
                     steps {
                         script {
-                            echo "Running tests with Chrome"
-                             sh 'npm run test:chrome'
+                            def myImage = docker.image('playwright-tests:latest')
+                            myImage.inside("-u root -v ${BROWSERS_PATH}:/opt -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
+                                	
+                                sh "npm test:chrome"		
+                            }
                         }
                     }
                 }
-            }
-        }
-
-        stage('Debug Report Directories') {
-            steps {
-                echo "Listing reports directories"
-                sh 'ls -l ${WORKSPACE}/playwright-report || echo "No Chrome reports found"'
-                sh 'ls -l ${WORKSPACE}/playwright-report || echo "No Firefox reports found"'
-                sh 'ls -l ${WORKSPACE}/playwright-report || echo "No Edge reports found"'
+                // stage('Run with Chromium') {
+                //     steps {
+                //         script {
+                //             def myImage = docker.image('playwright-tests:latest')
+                //             myImage.inside('-u root -e ENVIRONNEMENT=integ -e BROWSER=chromium -e RUNNER=1') {	
+                //                 sh "npx cucumber-js --config=cucumber.js --retry 2 --tags \"@integ and \"@current"	
+                //             }
+                //         }
+                //     }
+                // }
             }
         }
     }
-
     post {
         always {
             script {
@@ -98,29 +111,56 @@ pipeline {
                             reportTitles: 'Rapport de test chrome'
                     ]
                 )
-             
-           
-                def jenkinsURL = env.BUILD_URL ?: 'https://jenkins.app.hub-dsi.net'
+                publishHTML (
+                    target : [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'playwright-report',
+                            reportFiles: 'index.html',
+                            reportName: FIREFOX_REPORT_NAME,
+                            reportTitles: 'Rapport de test firefox'
+                    ]
+                )
+                publishHTML (
+                    target : [
+                            allowMissing: false,
+                            alwaysLinkToLastBuild: true,
+                            keepAll: true,
+                            reportDir: 'playwright-report',
+                            reportFiles: 'index.html',
+                            reportName: EDGE_REPORT_NAME,
+                            reportTitles: 'Rapport de test edge'
+                    ]
+                )
+
                 def status = currentBuild.resultIsBetterOrEqualTo('SUCCESS') ? 'SUCCES ✅' : 'ECHEC ❌'
-                emailext(
-                    to: MAILING_LIST,
+                emailext (
+                    to: "${MAILING_LIST}",
                     subject: "[${PROJECT_NAME}] - Résultats des tests E2E | [${status}]",
                     body: """
                         Salut l'équipe, <br/><br/>
+
                         Les tests E2E pour ${PROJECT_NAME} sont terminés. Vous pouvez consulter les résultats détaillés via les liens ci-dessous : <br/><br/>
-                        <h2>Rapport complet des tests :</h2>
+
+                        <h2>Rapport complet des tests: </h2>
                         <ul>
                             <li>Firefox: <a href='${BUILD_URL}${FIREFOX_REPORT_NAME}'>Voir le rapport</a></li>
                             <li>Chrome: <a href='${BUILD_URL}${CHROME_REPORT_NAME}'>Voir le rapport</a></li>
                             <li>Edge: <a href='${BUILD_URL}${EDGE_REPORT_NAME}'>Voir le rapport</a></li>
                         </ul><br/><br/>
-                        N'hésitez pas à me faire signe si vous avez des questions ou besoin de plus de détails.<br/><br/>
+
+                        N'hésitez pas à me faire signe si vous avez des questions ou si vous avez besoin de plus de détails.<br/><br/>
+
                         Bonne journée à tous !<br/><br/>
+
                         Fred Zengue
                     """,
                     attachLog: true,
                     mimeType: 'text/html'
                 )
+
+
             }
         }
     }
