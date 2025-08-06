@@ -3,6 +3,9 @@ import * as dotenv from 'dotenv';
 
 dotenv.config(); // Charge .env
 
+console.log('USERNAME:', process.env.GITHUB_USERNAME);
+console.log('PASSWORD:', process.env.GITHUB_PASSWORD);
+
 const adminFile = 'playwright/.auth/admin.json';
 const userFile = 'playwright/.auth/user.json';
 
