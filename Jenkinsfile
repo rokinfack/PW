@@ -12,6 +12,13 @@ pipeline {
     }
 
     stages {
+         stage('Remove Docker Images') {
+            steps {
+                echo "Cleaning up old Docker artifacts..."
+                sh 'docker images'
+                sh "docker rmi -f ${ DOCKER_IMAGE} || true "
+            }
+          }
         stage('Build Docker Image') {
             steps {
                 script {
