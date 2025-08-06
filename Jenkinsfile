@@ -38,7 +38,7 @@ pipeline {
                     steps {
                         script {
                             docker.image(DOCKER_IMAGE).inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=firefox -e RUNNER=2") {
-                                sh "npm run test:allure"
+                                sh "npm run test:allure1"
                             }
                         }
                     }
@@ -47,7 +47,7 @@ pipeline {
                     steps {
                         script {
                             docker.image(DOCKER_IMAGE).inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=edge -e RUNNER=2") {
-                                sh "npm run test:allure"
+                                sh "npm run test:allure1"
                             }
                         }
                     }
@@ -56,7 +56,7 @@ pipeline {
                     steps {
                         script {
                             docker.image(DOCKER_IMAGE).inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
-                                sh "npm run test:allure"
+                                sh "npm run test:allure2"
                             }
                         }
                     }
