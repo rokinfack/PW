@@ -49,6 +49,7 @@ pipeline {
                      docker.image(DOCKER_IMAGE).inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
                     // Copier le fichier .env dans le conteneur
                       sh "cp ${ENV_FILE} .env"
+                      sh 'ls -l .env'
                     sh "npm run test:allure2"
                 }
             }
