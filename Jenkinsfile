@@ -22,16 +22,6 @@ pipeline {
             }
         }
 
-        stage('Install dependencies') {
-            steps {
-                script {
-                    docker.image(DOCKER_IMAGE).inside('-u root') {
-                        sh 'npm ci'
-                    }
-                }
-            }
-        }
-
         stage('Run Playwright Tests') {
             parallel {
                 stage('Run with firefox') {
@@ -52,15 +42,20 @@ pipeline {
                         }
                     }
                 }
-                stage('Run with Chrome') {
-                    steps {
-                        script {
-                            docker.image(DOCKER_IMAGE).inside("-u root  -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
-                                sh "npm run test:allure2"
-                            }
-                        }
-                    }
+              stage('Run with Chrome') {
+    steps {
+        withCredentials([file(credentialsId: 'env-file', variable: 'ENV_FILE')]) {
+            script {
+                docker.image(DOCKER_IMAGE).inside("-u root -e ENVIRONNEMENT=integ -e BROWSER=chrome -e RUNNER=2") {
+                    // Copier le fichier .env dans le conteneur
+                    sh "cp ${ENV_FILE} .env"
+                    sh "npm run test:allure2"
                 }
+            }
+        }
+    }
+}
+
             }
         }
 
